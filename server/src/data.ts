@@ -178,74 +178,6 @@ export const mockData: Record<string, WeddingOption[]> = {
       details: ["Full day coverage", "Photos + highlight reel", "2 photographers + videographer", "4K video"],
     },
   ],
-  attire: [
-    {
-      id: "attire-1",
-      name: "Classic Elegance",
-      description: "Timeless A-line gown with lace bodice and flowing train.",
-      price: 3500,
-      imageUrl: "https://picsum.photos/seed/classic-dress/400/300",
-      details: ["A-line silhouette", "Lace & tulle", "Cathedral train", "Custom fitting included"],
-    },
-    {
-      id: "attire-2",
-      name: "Modern Chic",
-      description: "Sleek minimalist design with clean lines and contemporary flair.",
-      price: 2800,
-      imageUrl: "https://picsum.photos/seed/modern-suit/400/300",
-      details: ["Sheath silhouette", "Crepe fabric", "Detachable cape", "Tailoring included"],
-    },
-    {
-      id: "attire-3",
-      name: "Bohemian Dream",
-      description: "Free-spirited dress with flowing fabric and floral details.",
-      price: 2200,
-      imageUrl: "https://picsum.photos/seed/boho-dress/400/300",
-      details: ["Empire waist", "Flowing chiffon", "Floral embroidery", "Comfortable fit"],
-    },
-    {
-      id: "attire-4",
-      name: "Royal Glamour",
-      description: "Show-stopping ball gown with beaded bodice and full skirt.",
-      price: 5000,
-      imageUrl: "https://picsum.photos/seed/ball-gown/400/300",
-      details: ["Ball gown silhouette", "Hand-beaded bodice", "Full tulle skirt", "Veil included"],
-    },
-  ],
-  invitations: [
-    {
-      id: "invite-1",
-      name: "Letterpress Classic",
-      description: "Timeless letterpress printing on premium cotton paper.",
-      price: 800,
-      imageUrl: "https://picsum.photos/seed/letterpress/400/300",
-      details: ["100 invitations", "Cotton paper", "Matching envelopes", "RSVP cards included"],
-    },
-    {
-      id: "invite-2",
-      name: "Watercolor Garden",
-      description: "Hand-painted watercolor florals with modern calligraphy.",
-      price: 650,
-      imageUrl: "https://picsum.photos/seed/watercolor-card/400/300",
-      details: ["100 invitations", "Custom watercolor", "Digital RSVP option", "Save-the-dates included"],
-    },
-    {
-      id: "invite-3",
-      name: "Minimalist Modern",
-      description: "Clean, modern design with bold typography on recycled paper.",
-      price: 450,
-      imageUrl: "https://picsum.photos/seed/minimal-card/400/300",
-      details: ["100 invitations", "Recycled paper", "QR code RSVP", "Eco-friendly"],
-    },
-    {
-      id: "invite-4",
-      name: "Digital Suite",
-      description: "Beautiful animated digital invitations with built-in RSVP.",
-      price: 200,
-      imageUrl: "https://picsum.photos/seed/digital-invite/400/300",
-      details: ["Unlimited sends", "Animated design", "Built-in RSVP tracking", "Mobile optimized"],
-    },
-  ],
 };
 
 export const categoryOrder = [
@@ -254,8 +186,6 @@ export const categoryOrder = [
   "music",
   "flowers",
   "photography",
-  "attire",
-  "invitations",
 ] as const;
 
 export const categoryLabels: Record<string, string> = {
@@ -264,8 +194,6 @@ export const categoryLabels: Record<string, string> = {
   music: "Music & Entertainment",
   flowers: "Flowers & Decoration",
   photography: "Photography",
-  attire: "Attire",
-  invitations: "Invitations",
 };
 
 export type Category = (typeof categoryOrder)[number];

@@ -1,6 +1,11 @@
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 import { mockData, categoryLabels, categoryOrder } from "./data.js";
+import { searchVenues } from "./api/venues.js";
+import { searchCatering } from "./api/catering.js";
+import { searchMusic } from "./api/music.js";
+import { searchFlowers } from "./api/flowers.js";
+import { searchPhotography } from "./api/photography.js";
 
 const categoryIntros: Record<string, string> = {
   venues: "Where your love story will unfold — the venue sets the tone for everything.",
@@ -76,7 +81,12 @@ const server = new McpServer(
       _meta: {
         ui: {
           csp: {
-            resourceDomains: ["https://picsum.photos", "https://fastly.picsum.photos"],
+            resourceDomains: [
+            "https://picsum.photos",
+            "https://fastly.picsum.photos",
+            "https://places.googleapis.com",
+            "https://lh3.googleusercontent.com",
+          ],
           },
         },
       },
@@ -96,20 +106,40 @@ const server = new McpServer(
       },
       annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
     },
-    async ({ style: _style, guestCount, budget: _budget, location: _location }) => {
+    async ({ style, guestCount, budget: _budget, location }) => {
+      console.log("[plan-wedding] location:", location, "| style:", style, "| API key set:", !!process.env.GOOGLE_PLACES_API_KEY);
+
+      const [venueOptions, cateringOptions, musicOptions, flowerOptions, photoOptions] = await Promise.all([
+        location ? searchVenues(location, style) : Promise.resolve(mockData.venues),
+        location ? searchCatering(location, style) : Promise.resolve(mockData.catering),
+        location ? searchMusic(location, style) : Promise.resolve(mockData.music),
+        location ? searchFlowers(location, style) : Promise.resolve(mockData.flowers),
+        location ? searchPhotography(location, style) : Promise.resolve(mockData.photography),
+      ]);
+
+      const liveData: Record<string, typeof venueOptions> = {
+        venues: venueOptions,
+        catering: cateringOptions,
+        music: musicOptions,
+        flowers: flowerOptions,
+        photography: photoOptions,
+      };
+
       const categories = categoryOrder.map((key) => ({
         key,
         label: categoryLabels[key],
         intro: categoryIntros[key],
         isPerPerson: key === "catering",
-        options: mockData[key].map(({ id, name, description, price, details, imageUrl }) => ({
-          id,
-          name,
-          description,
-          price,
-          details,
-          imageUrl,
-        })),
+        options: (liveData[key] ?? mockData[key]).map(
+          ({ id, name, description, price, details, imageUrl }) => ({
+            id,
+            name,
+            description,
+            price,
+            details,
+            imageUrl,
+          }),
+        ),
       }));
 
       const structuredContent = {

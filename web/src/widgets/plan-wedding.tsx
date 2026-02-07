@@ -158,8 +158,14 @@ function PlanWedding() {
                         ))}
                       </div>
                       <div className="card-price">
-                        ${option.price.toLocaleString()}
-                        {current.isPerPerson && <span className="price-unit">/person</span>}
+                        {option.price > 0 ? (
+                          <>
+                            ${option.price.toLocaleString()}
+                            {current.isPerPerson && <span className="price-unit">/person</span>}
+                          </>
+                        ) : (
+                          <span className="price-contact">Contact for pricing</span>
+                        )}
                       </div>
                     </div>
                   </button>
@@ -216,8 +222,14 @@ function PlanWedding() {
                         <>
                           <span className="summary-name">{sel.name}</span>
                           <span className="summary-price">
-                            ${totalPrice.toLocaleString()}
-                            {cat.isPerPerson && ` ($${sel.price}/person × ${guestCount})`}
+                            {totalPrice > 0 ? (
+                              <>
+                                ${totalPrice.toLocaleString()}
+                                {cat.isPerPerson && ` ($${sel.price}/person × ${guestCount})`}
+                              </>
+                            ) : (
+                              "Contact for pricing"
+                            )}
                           </span>
                         </>
                       ) : (

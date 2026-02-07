@@ -1,3 +1,5 @@
+try { process.loadEnvFile(); } catch {}
+
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import cors from "cors";

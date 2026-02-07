@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 import { mockData, categoryLabels, categoryOrder, type Category } from "./data.js";

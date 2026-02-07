@@ -11,6 +11,14 @@ A minimal TypeScript template for building MCP and ChatGPT Apps with the [Skybri
 
 ### Local Development
 
+#### 0. Configure API keys (optional)
+
+To use live vendor search via Google Places, set `GOOGLE_PLACES_API_KEY` in your environment.
+
+```bash
+export GOOGLE_PLACES_API_KEY="your-key-here"
+```
+
 #### 1. Install
 
 ```bash

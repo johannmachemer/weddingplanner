@@ -2,6 +2,140 @@ import { McpServer } from "skybridge/server";
 import { z } from "zod";
 import { mockData, categoryLabels, categoryOrder, type Category } from "./data.js";
 
+const googlePlacesApiKey = process.env.GOOGLE_PLACES_API_KEY;
+const fallbackImageDomain = "https://picsum.photos";
+
+type VendorOption = {
+  id: string;
+  name: string;
+  description: string;
+  price?: number;
+  details: string[];
+  imageUrl: string;
+  address?: string;
+  rating?: number;
+  reviewCount?: number;
+  priceLevel?: number;
+};
+
+const categoryQueries: Record<Category, string> = {
+  venues: "wedding venue",
+  catering: "wedding caterer",
+  music: "wedding DJ or live band",
+  flowers: "wedding florist",
+  photography: "wedding photographer",
+  attire: "bridal shop",
+  invitations: "wedding invitations",
+};
+
+const formatPriceLevel = (priceLevel: number) => "$".repeat(Math.min(Math.max(priceLevel + 1, 1), 5));
+
+const buildQuery = (category: Category, location: string, style?: string) => {
+  const stylePrefix = style ? `${style} ` : "";
+  return `${stylePrefix}${categoryQueries[category]} in ${location}`;
+};
+
+const buildFallbackImage = (seed: string) =>
+  `${fallbackImageDomain}/seed/${encodeURIComponent(seed)}/400/300`;
+
+const toMockOptions = (category: Category): VendorOption[] =>
+  (mockData[category] || []).map((option) => ({
+    id: option.id,
+    name: option.name,
+    description: option.description,
+    price: option.price,
+    details: option.details,
+    imageUrl: option.imageUrl,
+  }));
+
+const toGoogleImageUrl = (photoReference: string) =>
+  `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${encodeURIComponent(
+    photoReference,
+  )}&key=${encodeURIComponent(googlePlacesApiKey || "")}`;
+
+const fetchGooglePlaces = async ({
+  category,
+  location,
+  style,
+  maxResults,
+}: {
+  category: Category;
+  location: string;
+  style?: string;
+  maxResults: number;
+}): Promise<VendorOption[] | null> => {
+  if (!googlePlacesApiKey || !location) {
+    return null;
+  }
+
+  const url = new URL("https://maps.googleapis.com/maps/api/place/textsearch/json");
+  url.searchParams.set("query", buildQuery(category, location, style));
+  url.searchParams.set("key", googlePlacesApiKey);
+
+  try {
+    const response = await fetch(url.toString());
+    if (!response.ok) {
+      console.warn("Google Places request failed:", response.status, response.statusText);
+      return null;
+    }
+
+    const data = (await response.json()) as {
+      status: string;
+      results?: Array<{
+        place_id: string;
+        name: string;
+        formatted_address?: string;
+        rating?: number;
+        user_ratings_total?: number;
+        price_level?: number;
+        photos?: Array<{ photo_reference: string }>;
+      }>;
+    };
+
+    if (data.status !== "OK" && data.status !== "ZERO_RESULTS") {
+      console.warn("Google Places response status:", data.status);
+      return null;
+    }
+
+    const results = data.results || [];
+
+    return results.slice(0, maxResults).map((result) => {
+      const address = result.formatted_address;
+      const rating = result.rating;
+      const reviewCount = result.user_ratings_total;
+      const priceLevel = result.price_level;
+      const photoReference = result.photos?.[0]?.photo_reference;
+
+      const details: string[] = [];
+      if (address) details.push(address);
+      if (rating !== undefined) {
+        const reviewLabel = reviewCount ? ` (${reviewCount} reviews)` : "";
+        details.push(`Rating: ${rating.toFixed(1)}${reviewLabel}`);
+      }
+      if (priceLevel !== undefined) {
+        details.push(`Price level: ${formatPriceLevel(priceLevel)}`);
+      }
+
+      return {
+        id: result.place_id,
+        name: result.name,
+        description: address || "Popular local vendor",
+        details,
+        imageUrl: photoReference
+          ? toGoogleImageUrl(photoReference)
+          : buildFallbackImage(`${category}-${result.place_id}`),
+        address,
+        rating,
+        reviewCount,
+        priceLevel,
+      };
+    });
+  } catch (error) {
+    console.warn("Google Places request error:", error);
+    return null;
+  }
+};
+
 const categoryIntros: Record<string, string> = {
   venues:
     "Now for the most exciting part — choosing where your love story will unfold! " +
@@ -90,7 +224,11 @@ const server = new McpServer(
       _meta: {
         ui: {
           csp: {
-            resourceDomains: ["https://picsum.photos", "https://fastly.picsum.photos"],
+            resourceDomains: [
+              "https://picsum.photos",
+              "https://fastly.picsum.photos",
+              "https://maps.googleapis.com",
+            ],
           },
         },
       },
@@ -99,21 +237,37 @@ const server = new McpServer(
       description:
         "Show wedding options for a specific category. Only call this AFTER the start-planning tool has been called and the discovery conversation is complete. " +
         "Available categories: venues, catering, music, flowers, photography, attire, invitations. " +
-        "Follow the category order. After the user selects an option, acknowledge their choice with enthusiasm and a brief expert comment, then move to the next category. " +
+        "Follow the category order. If the user provided a location, pass it to enable live vendor results. " +
+        "After the user selects an option, acknowledge their choice with enthusiasm and a brief expert comment, then move to the next category. " +
         "If the user wants to change a previous choice, re-call this tool with that category.",
       inputSchema: {
         category: z
           .enum(["venues", "catering", "music", "flowers", "photography", "attire", "invitations"])
           .describe("The wedding planning category to browse"),
+        location: z.string().optional().describe("City/region to search vendors in (used for live vendor lookup)"),
         style: z.string().optional().describe("The user's preferred wedding style (e.g. rustic, elegant, modern, bohemian)"),
         guestCount: z.number().optional().describe("Expected number of guests"),
         budget: z.number().optional().describe("Total wedding budget"),
+        maxResults: z.number().min(1).max(8).optional().describe("Maximum number of vendors to return"),
       },
-      annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
+      annotations: { readOnlyHint: true, openWorldHint: true, destructiveHint: false },
     },
-    async ({ category, style: _style, guestCount: _guestCount, budget: _budget }) => {
-      const options = mockData[category];
-      if (!options) {
+    async ({ category, location, style, maxResults }) => {
+      const fallbackOptions = toMockOptions(category);
+      const liveOptions =
+        location && googlePlacesApiKey
+          ? await fetchGooglePlaces({
+              category,
+              location,
+              style,
+              maxResults: maxResults ?? 4,
+            })
+          : null;
+
+      const options = liveOptions && liveOptions.length > 0 ? liveOptions : fallbackOptions;
+      const dataSource = liveOptions && liveOptions.length > 0 ? "google-places" : "mock";
+
+      if (!options || options.length === 0) {
         return {
           content: [{ type: "text" as const, text: `Unknown category: ${category}` }],
           isError: true,
@@ -135,19 +289,25 @@ const server = new McpServer(
         nextCategory,
         nextCategoryLabel,
         isPerPerson,
+        dataSource,
         llmIntro: intro,
         llmBehavior: [
           "Present the widget with a brief, warm introduction adapted from llmIntro.",
           "Do NOT list the options in text — the widget shows them visually.",
           "Keep your message short (2-3 sentences max). Let the widget do the heavy lifting.",
           "If the user asks about a specific option, provide helpful expert commentary.",
+          "If dataSource is google-places, avoid asserting exact pricing since it may not be provided.",
         ],
-        options: options.map(({ id, name, description, price, details }) => ({
+        options: options.map(({ id, name, description, price, details, address, rating, reviewCount, priceLevel }) => ({
           id,
           name,
           description,
           price,
           details,
+          address,
+          rating,
+          reviewCount,
+          priceLevel,
         })),
       };
 

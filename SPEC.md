@@ -68,8 +68,8 @@ User can revisit any category at any time by asking.
 ## Tools and Widgets
 
 **Widget: browse-options**
-- **Input**: `{ category, style?, guestCount?, budget? }`
-- **Output**: `{ category, categoryLabel, step, totalSteps, nextCategory, isPerPerson, options[] }`
+- **Input**: `{ category, location?, style?, guestCount?, budget?, maxResults? }`
+- **Output**: `{ category, categoryLabel, step, totalSteps, nextCategory, isPerPerson, dataSource, options[] }`
 - **Views**: Card grid with image, name, description, price, details
 - **State**: `selectedId` — persisted, visible to LLM via `useWidgetState`
 - **Behavior**: User selects a card, clicks "Continue" to trigger LLM to proceed to next category
@@ -82,7 +82,7 @@ User can revisit any category at any time by asking.
 ## Product Context
 
 - **Existing products**: None — greenfield project
-- **API/Data**: Mock data with realistic fake venues, caterers, musicians, etc.
+- **API/Data**: Google Places API for live vendor discovery (venues, caterers, DJs, florists, photographers, bridal shops, invitations). Falls back to mock data if no API key or no results.
 - **Auth**: None required
 - **Constraints**:
   - Widget space is limited — show 3-4 cards per category

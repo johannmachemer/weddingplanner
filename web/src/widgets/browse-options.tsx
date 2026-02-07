@@ -19,13 +19,20 @@ function BrowseOptions() {
   const { categoryLabel, step, totalSteps, nextCategory, nextCategoryLabel, isPerPerson, options } = output;
   const images = responseMetadata?.images || [];
   const selectedOption = options.find((o) => o.id === selectedId);
+  const selectionSummary = selectedOption
+    ? selectedOption.price !== undefined
+      ? `$${selectedOption.price}${isPerPerson ? "/person" : ""}`
+      : selectedOption.rating !== undefined
+        ? `${selectedOption.rating.toFixed(1)}★`
+        : "selected"
+    : "no selection yet";
 
   return (
     <div
       className="browse-container"
       data-llm={
         selectedOption
-          ? `Selected ${categoryLabel}: "${selectedOption.name}" ($${selectedOption.price}${isPerPerson ? "/person" : ""})`
+          ? `Selected ${categoryLabel}: "${selectedOption.name}" (${selectionSummary})`
           : `Browsing ${categoryLabel} — no selection yet`
       }
     >
@@ -51,6 +58,19 @@ function BrowseOptions() {
             <div className="card-content">
               <h3>{option.name}</h3>
               <p className="card-description">{option.description}</p>
+              {(option.rating !== undefined || option.priceLevel !== undefined) && (
+                <div className="card-meta">
+                  {option.rating !== undefined && (
+                    <span className="rating">
+                      ★ {option.rating.toFixed(1)}
+                      {option.reviewCount ? ` (${option.reviewCount})` : ""}
+                    </span>
+                  )}
+                  {option.priceLevel !== undefined && (
+                    <span className="price-level">{"$".repeat(Math.min(option.priceLevel + 1, 5))}</span>
+                  )}
+                </div>
+              )}
               <div className="card-details">
                 {option.details.map((detail, j) => (
                   <span key={j} className="detail-tag">
@@ -58,10 +78,12 @@ function BrowseOptions() {
                   </span>
                 ))}
               </div>
-              <div className="card-price">
-                ${option.price.toLocaleString()}
-                {isPerPerson && <span className="price-unit">/person</span>}
-              </div>
+              {option.price !== undefined && (
+                <div className="card-price">
+                  ${option.price.toLocaleString()}
+                  {isPerPerson && <span className="price-unit">/person</span>}
+                </div>
+              )}
             </div>
           </button>
         ))}
@@ -72,11 +94,17 @@ function BrowseOptions() {
           <button
             className="continue-btn"
             onClick={() => {
+              const selectedDetail =
+                selectedOption?.price !== undefined
+                  ? `$${selectedOption.price}${isPerPerson ? "/person" : ""}`
+                  : selectedOption?.rating !== undefined
+                    ? `${selectedOption.rating.toFixed(1)}★${selectedOption.reviewCount ? ` (${selectedOption.reviewCount} reviews)` : ""}`
+                    : "no price listed";
               if (nextCategory) {
                 sendMessage(
-                  `The user selected "${selectedOption?.name}" ($${selectedOption?.price}${isPerPerson ? "/person" : ""}) for ${categoryLabel}. ` +
+                  `The user selected "${selectedOption?.name}" (${selectedDetail}) for ${categoryLabel}. ` +
                   `Respond with a brief, warm acknowledgment of their choice — add a short expert insight about why it's a great pick. ` +
-                  `Then introduce the next category (${nextCategoryLabel}) and call browse-options with category="${nextCategory}".`,
+                  `Then introduce the next category (${nextCategoryLabel}) and call browse-options with category="${nextCategory}" (include location if known).`,
                 );
               } else {
                 sendMessage(

@@ -106,11 +106,13 @@ const server = new McpServer(
         "Do NOT call this multiple times. After calling it, let the user interact with the widget. " +
         "If the user asks questions about options while using the widget, answer helpfully based on your wedding expertise. " +
         "When the user shares their final plan via the widget, celebrate their choices and highlight how they complement each other. " +
+        "IMPORTANT: Always provide the 'budget' parameter with the user's total budget as a number (e.g. 30000 for $30,000). This is used to generate realistic price estimates for each vendor. " +
         "IMPORTANT: Always provide the 'queries' parameter with tailored Google Places search queries for each category based on what you learned during the discovery conversation. " +
         "Craft specific queries that reflect the couple's style, location, and preferences (e.g. 'rustic barn wedding venue near Provence' instead of generic 'wedding venue')."+
         "When the users asks for changes or is not satisfied with the options, recall the tool with a new query for this category that is more specific based on their feedback. For example, if they want more elegant venues, update the query to 'elegant wedding venues in [location]'. ",
       inputSchema: {
         guestCount: z.number().optional().describe("Expected number of guests"),
+        budget: z.number().optional().describe("Total wedding budget in dollars"),
         queries: z.object({
           venues: z.string().describe("Google Places search query for wedding venues"),
           catering: z.string().describe("Google Places search query for catering"),
@@ -121,8 +123,8 @@ const server = new McpServer(
       },
       annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
     },
-    async ({ guestCount, queries }) => {
-      console.log("[plan-wedding] queries:", queries, "| API key set:", !!process.env.GOOGLE_PLACES_API_KEY);
+    async ({ guestCount, budget, queries }) => {
+      console.log("[plan-wedding] queries:", queries, "| budget:", budget, "| API key set:", !!process.env.GOOGLE_PLACES_API_KEY);
 
       const [venueOptions, cateringOptions, musicOptions, flowerOptions, photoOptions] = await Promise.all([
         searchVenues(queries.venues),
@@ -140,24 +142,60 @@ const server = new McpServer(
         photography: photoOptions,
       };
 
-      const categories = categoryOrder.map((key) => ({
-        key,
-        label: categoryLabels[key],
-        intro: categoryIntros[key],
-        isPerPerson: key === "catering",
-        options: (liveData[key] ?? mockData[key]).map(
-          ({ id, name, description, price, details, imageUrl, coords, url }) => ({
-            id,
-            name,
-            description,
-            price,
-            details,
-            imageUrl,
-            ...(coords && { coords }),
-            ...(url && { url }),
-          }),
-        ),
-      }));
+      // Budget percentage allocations per category
+      const budgetPercent: Record<string, number> = {
+        venues: 0.40,
+        catering: 0.25,
+        music: 0.10,
+        flowers: 0.06,
+        photography: 0.10,
+      };
+
+      // Sample a price around a target with ±20% random variation
+      const samplePrice = (target: number) => {
+        const variation = 0.8 + Math.random() * 0.4; // 0.8 to 1.2
+        return Math.round(target * variation / 50) * 50; // round to nearest 50
+      };
+
+      const effectiveBudget = budget || 0;
+      const guests = guestCount || 100;
+
+      const categories = categoryOrder.map((key) => {
+        const isPerPerson = key === "catering";
+        const categoryBudget = effectiveBudget * (budgetPercent[key] ?? 0);
+
+        return {
+          key,
+          label: categoryLabels[key],
+          intro: categoryIntros[key],
+          isPerPerson,
+          options: (liveData[key] ?? mockData[key]).map(
+            ({ id, name, description, price, details, imageUrl, coords, url }) => {
+              // If we have a budget and the option has no real price, sample one
+              let finalPrice = price;
+              if (effectiveBudget > 0 && price === 0) {
+                if (isPerPerson) {
+                  // For catering: sample a per-person price
+                  finalPrice = samplePrice(categoryBudget / guests);
+                } else {
+                  finalPrice = samplePrice(categoryBudget);
+                }
+              }
+
+              return {
+                id,
+                name,
+                description,
+                price: finalPrice,
+                details,
+                imageUrl,
+                ...(coords && { coords }),
+                ...(url && { url }),
+              };
+            },
+          ),
+        };
+      });
 
       const structuredContent = {
         categories,

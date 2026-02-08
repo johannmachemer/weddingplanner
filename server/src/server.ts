@@ -146,7 +146,7 @@ const server = new McpServer(
         intro: categoryIntros[key],
         isPerPerson: key === "catering",
         options: (liveData[key] ?? mockData[key]).map(
-          ({ id, name, description, price, details, imageUrl, coords }) => ({
+          ({ id, name, description, price, details, imageUrl, coords, url }) => ({
             id,
             name,
             description,
@@ -154,6 +154,7 @@ const server = new McpServer(
             details,
             imageUrl,
             ...(coords && { coords }),
+            ...(url && { url }),
           }),
         ),
       }));

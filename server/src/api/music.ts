@@ -49,6 +49,7 @@ export async function searchMusic(query: string): Promise<WeddingOption[]> {
         imageUrl: photoUrl,
         details,
         ...(place.location && { coords: [place.location.longitude, place.location.latitude] as [number, number] }),
+        ...(place.websiteUri && { url: place.websiteUri }),
       };
     });
   } catch (error) {

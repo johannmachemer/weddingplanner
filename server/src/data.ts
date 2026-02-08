@@ -6,6 +6,7 @@ export interface WeddingOption {
   imageUrl: string;
   details: string[];
   coords?: [number, number]; // [longitude, latitude]
+  url?: string; // place website
 }
 
 export const mockData: Record<string, WeddingOption[]> = {

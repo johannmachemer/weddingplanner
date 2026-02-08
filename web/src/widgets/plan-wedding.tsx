@@ -296,6 +296,17 @@ function PlanWedding() {
                                   <span className="price-contact">Contact for pricing</span>
                                 )}
                               </div>
+                              {option.url && (
+                                <a
+                                  className="maps-link"
+                                  href={option.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  Visit Website &rarr;
+                                </a>
+                              )}
                             </div>
                             {isSelected && <div className="map-list-check">{"\u2713"}</div>}
                           </button>
@@ -364,6 +375,17 @@ function PlanWedding() {
                               <span className="price-contact">Contact for pricing</span>
                             )}
                           </div>
+                          {option.url && (
+                            <a
+                              className="maps-link"
+                              href={option.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              Visit Website &rarr;
+                            </a>
+                          )}
                         </div>
                       </button>
                     );

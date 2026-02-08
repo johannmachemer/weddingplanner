@@ -483,6 +483,24 @@ html, body {
   color: var(--color-text-tertiary);
 }
 
+/* ── Google Maps link ── */
+.maps-link {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--accent-sage-darker);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--transition-duration) var(--transition-ease);
+}
+
+.maps-link:hover {
+  color: var(--accent-sage-dark);
+  text-decoration: underline;
+}
+
 /* ── Navigation bar ── */
 .nav-bar {
   display: flex;

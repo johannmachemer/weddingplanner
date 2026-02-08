@@ -81,12 +81,20 @@ const server = new McpServer(
       _meta: {
         ui: {
           csp: {
+            connectDomains: [
+              "https://api.mapbox.com",
+              "https://*.tiles.mapbox.com",
+              "https://events.mapbox.com",
+            ],
             resourceDomains: [
-            "https://picsum.photos",
-            "https://fastly.picsum.photos",
-            "https://places.googleapis.com",
-            "https://lh3.googleusercontent.com",
-          ],
+              "https://picsum.photos",
+              "https://fastly.picsum.photos",
+              "https://places.googleapis.com",
+              "https://lh3.googleusercontent.com",
+              "https://api.mapbox.com",
+              "https://*.tiles.mapbox.com",
+              "https://fonts.googleapis.com",
+            ],
           },
         },
       },
@@ -131,13 +139,14 @@ const server = new McpServer(
         intro: categoryIntros[key],
         isPerPerson: key === "catering",
         options: (liveData[key] ?? mockData[key]).map(
-          ({ id, name, description, price, details, imageUrl }) => ({
+          ({ id, name, description, price, details, imageUrl, coords }) => ({
             id,
             name,
             description,
             price,
             details,
             imageUrl,
+            ...(coords && { coords }),
           }),
         ),
       }));

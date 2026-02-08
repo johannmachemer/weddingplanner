@@ -1,8 +1,108 @@
 import "@/index.css";
 import { mountWidget, useWidgetState, useDisplayMode, useSendFollowUpMessage } from "skybridge/web";
 import { useToolInfo } from "../helpers";
+import { useEffect, useRef, useCallback } from "react";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+
+mapboxgl.accessToken =
+  "pk.eyJ1IjoiZXJpY25pbmciLCJhIjoiY21icXlubWM1MDRiczJvb2xwM2p0amNyayJ9.n-3O6JI5nOp_Lw96ZO5vJQ";
 
 type Selections = Record<string, { id: string; name: string; price: number }>;
+
+interface MapOption {
+  id: string;
+  name: string;
+  coords: [number, number];
+}
+
+function VenueMap({
+  options,
+  selectedId,
+  onSelect,
+}: {
+  options: MapOption[];
+  selectedId?: string;
+  onSelect: (id: string) => void;
+}) {
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
+
+  useEffect(() => {
+    if (!mapContainer.current || mapRef.current) return;
+
+    const coords = options.map((o) => o.coords);
+    const map = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: "mapbox://styles/mapbox/streets-v12",
+      center: coords[0] || [0, 0],
+      zoom: 12,
+      attributionControl: false,
+    });
+
+    mapRef.current = map;
+    map.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+    if (coords.length > 1) {
+      const bounds = coords.reduce(
+        (b, c) => b.extend(c),
+        new mapboxgl.LngLatBounds(coords[0], coords[0]),
+      );
+      map.fitBounds(bounds, { padding: 60, animate: false });
+    }
+
+    return () => {
+      markersRef.current.forEach((m) => m.remove());
+      markersRef.current = [];
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  // Update markers when options or selection changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    markersRef.current.forEach((m) => m.remove());
+    markersRef.current = [];
+
+    options.forEach((option) => {
+      const isSelected = option.id === selectedId;
+      const marker = new mapboxgl.Marker({
+        color: isSelected ? "#7a9475" : "#303030",
+        scale: isSelected ? 1.2 : 0.9,
+      })
+        .setLngLat(option.coords)
+        .setPopup(
+          new mapboxgl.Popup({ offset: 25, closeButton: false }).setHTML(
+            `<div style="font-family:system-ui;font-size:13px;font-weight:500;padding:2px 0;">${option.name}</div>`,
+          ),
+        )
+        .addTo(map);
+
+      const el = marker.getElement();
+      el.style.cursor = "pointer";
+      el.addEventListener("click", () => onSelect(option.id));
+
+      if (isSelected) marker.togglePopup();
+      markersRef.current.push(marker);
+    });
+  }, [options, selectedId, onSelect]);
+
+  // Pan to selected marker
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !selectedId) return;
+    const option = options.find((o) => o.id === selectedId);
+    if (option) {
+      map.flyTo({ center: option.coords, zoom: 14, speed: 1.2 });
+    }
+  }, [selectedId]);
+
+  return <div ref={mapContainer} className="venue-map" />;
+}
 
 function PlanWedding() {
   const { output, isPending } = useToolInfo<"plan-wedding">();
@@ -12,6 +112,25 @@ function PlanWedding() {
     currentStep: 0,
     selections: {} as Selections,
   });
+
+  // Must call all hooks before any early returns
+  const handleMapSelect = useCallback(
+    (id: string) => {
+      const categories = output?.categories;
+      if (!categories) return;
+      const step = Math.min(currentStep, categories.length);
+      const current = step < categories.length ? categories[step] : null;
+      if (!current) return;
+      const option = current.options.find((o: any) => o.id === id);
+      if (option) {
+        setState((prev: any) => ({
+          ...prev,
+          selections: { ...prev.selections, [current.key]: option },
+        }));
+      }
+    },
+    [output, currentStep, setState],
+  );
 
   // Show inline teaser until user clicks to go fullscreen
   if (displayMode !== "fullscreen") {
@@ -41,6 +160,13 @@ function PlanWedding() {
   const clampedStep = Math.min(currentStep, totalSteps);
   const isSummary = clampedStep >= totalSteps;
   const current = !isSummary ? categories[clampedStep] : null;
+
+  // Show map for venues and flowers
+  const isMapStep = current?.key === "venues" || current?.key === "flowers";
+  const mapOptions = isMapStep
+    ? current.options.filter((o: any) => o.coords).map((o: any) => ({ id: o.id, name: o.name, coords: o.coords }))
+    : [];
+  const showMap = isMapStep && mapOptions.length > 0;
 
   // Calculate total budget
   let totalBudget = 0;
@@ -127,65 +253,138 @@ function PlanWedding() {
       </nav>
 
       {/* Main content */}
-      <main className="main-content">
+      <main className={`main-content ${showMap ? "has-map" : ""}`}>
         {!isSummary && current ? (
           <>
-            <div className="content-header">
-              <div className="content-step">Step {clampedStep + 1} of {totalSteps}</div>
-              <h2>{current.label}</h2>
-              <p className="content-intro">{current.intro}</p>
-            </div>
+            {showMap ? (
+              /* Venues: map + list layout */
+              <>
+                <div className="map-layout">
+                  <div className="map-list">
+                    <div className="map-list-header">
+                      <div className="content-step">Step {clampedStep + 1} of {totalSteps}</div>
+                      <h2>{current.label}</h2>
+                      <p className="content-intro">{current.intro}</p>
+                    </div>
+                    <div className="map-list-items">
+                      {current.options.map((option) => {
+                        const isSelected = selections[current.key]?.id === option.id;
+                        return (
+                          <button
+                            key={option.id}
+                            className={`map-list-item ${isSelected ? "selected" : ""}`}
+                            onClick={() => selectOption(option)}
+                          >
+                            <div className="map-list-img">
+                              <img src={option.imageUrl} alt={option.name} loading="lazy" />
+                            </div>
+                            <div className="map-list-info">
+                              <h4>{option.name}</h4>
+                              <p>{option.description}</p>
+                              <div className="map-list-tags">
+                                {option.details.slice(0, 2).map((d, j) => (
+                                  <span key={j} className="tag">{d}</span>
+                                ))}
+                              </div>
+                              <div className="card-price">
+                                {option.price > 0 ? (
+                                  <>
+                                    ${option.price.toLocaleString()}
+                                    {current.isPerPerson && <span className="price-unit">/person</span>}
+                                  </>
+                                ) : (
+                                  <span className="price-contact">Contact for pricing</span>
+                                )}
+                              </div>
+                            </div>
+                            {isSelected && <div className="map-list-check">{"\u2713"}</div>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="nav-bar">
+                      <button className="nav-btn secondary" onClick={goPrev} disabled={clampedStep === 0}>
+                        &larr; Back
+                      </button>
+                      <button
+                        className="nav-btn primary"
+                        onClick={goNext}
+                        disabled={!selections[current.key]}
+                      >
+                        Next <span>&rarr;</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="map-container">
+                    <VenueMap
+                      options={mapOptions}
+                      selectedId={selections[current.key]?.id}
+                      onSelect={handleMapSelect}
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* Other categories: standard grid layout */
+              <>
+                <div className="content-header">
+                  <div className="content-step">Step {clampedStep + 1} of {totalSteps}</div>
+                  <h2>{current.label}</h2>
+                  <p className="content-intro">{current.intro}</p>
+                </div>
 
-            <div className="options-grid">
-              {current.options.map((option) => {
-                const isSelected = selections[current.key]?.id === option.id;
-                return (
-                  <button
-                    key={option.id}
-                    className={`option-card ${isSelected ? "selected" : ""}`}
-                    onClick={() => selectOption(option)}
-                  >
-                    <div className="card-image">
-                      <img src={option.imageUrl} alt={option.name} loading="lazy" />
-                      {isSelected && <div className="selected-badge">Selected</div>}
-                    </div>
-                    <div className="card-body">
-                      <h3>{option.name}</h3>
-                      <p className="card-desc">{option.description}</p>
-                      <div className="card-tags">
-                        {option.details.map((d, j) => (
-                          <span key={j} className="tag">{d}</span>
-                        ))}
-                      </div>
-                      <div className="card-price">
-                        {option.price > 0 ? (
-                          <>
-                            ${option.price.toLocaleString()}
-                            {current.isPerPerson && <span className="price-unit">/person</span>}
-                          </>
-                        ) : (
-                          <span className="price-contact">Contact for pricing</span>
-                        )}
-                      </div>
-                    </div>
+                <div className="options-grid">
+                  {current.options.map((option) => {
+                    const isSelected = selections[current.key]?.id === option.id;
+                    return (
+                      <button
+                        key={option.id}
+                        className={`option-card ${isSelected ? "selected" : ""}`}
+                        onClick={() => selectOption(option)}
+                      >
+                        <div className="card-image">
+                          <img src={option.imageUrl} alt={option.name} loading="lazy" />
+                          {isSelected && <div className="selected-badge">Selected</div>}
+                        </div>
+                        <div className="card-body">
+                          <h3>{option.name}</h3>
+                          <p className="card-desc">{option.description}</p>
+                          <div className="card-tags">
+                            {option.details.map((d, j) => (
+                              <span key={j} className="tag">{d}</span>
+                            ))}
+                          </div>
+                          <div className="card-price">
+                            {option.price > 0 ? (
+                              <>
+                                ${option.price.toLocaleString()}
+                                {current.isPerPerson && <span className="price-unit">/person</span>}
+                              </>
+                            ) : (
+                              <span className="price-contact">Contact for pricing</span>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="nav-bar">
+                  <button className="nav-btn secondary" onClick={goPrev} disabled={clampedStep === 0}>
+                    &larr; Back
                   </button>
-                );
-              })}
-            </div>
-
-            <div className="nav-bar">
-              <button className="nav-btn secondary" onClick={goPrev} disabled={clampedStep === 0}>
-                &larr; Back
-              </button>
-              <button
-                className="nav-btn primary"
-                onClick={goNext}
-                disabled={!selections[current.key]}
-              >
-                {clampedStep === totalSteps - 1 ? "View Summary" : "Next"}
-                <span>&rarr;</span>
-              </button>
-            </div>
+                  <button
+                    className="nav-btn primary"
+                    onClick={goNext}
+                    disabled={!selections[current.key]}
+                  >
+                    {clampedStep === totalSteps - 1 ? "View Summary" : "Next"}
+                    <span>&rarr;</span>
+                  </button>
+                </div>
+              </>
+            )}
           </>
         ) : (
           /* Summary view */

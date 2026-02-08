@@ -19,7 +19,7 @@ export async function searchCatering(location: string, style?: string): Promise<
         "Content-Type": "application/json",
         "X-Goog-Api-Key": apiKey,
         "X-Goog-FieldMask":
-          "places.id,places.displayName,places.formattedAddress,places.editorialSummary,places.photos,places.rating,places.userRatingCount,places.websiteUri",
+          "places.id,places.displayName,places.formattedAddress,places.editorialSummary,places.photos,places.rating,places.userRatingCount,places.websiteUri,places.location",
       },
       body: JSON.stringify({ textQuery: query, maxResultCount: 6 }),
     });
@@ -52,6 +52,7 @@ export async function searchCatering(location: string, style?: string): Promise<
         price: 0,
         imageUrl: photoUrl,
         details,
+        ...(place.location && { coords: [place.location.longitude, place.location.latitude] as [number, number] }),
       };
     });
   } catch (error) {

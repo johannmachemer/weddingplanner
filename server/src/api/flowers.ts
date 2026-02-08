@@ -1,15 +1,11 @@
 import { mockData, type WeddingOption } from "../data.js";
 
-export async function searchFlowers(location: string, style?: string): Promise<WeddingOption[]> {
+export async function searchFlowers(query: string): Promise<WeddingOption[]> {
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   if (!apiKey) {
     console.warn("GOOGLE_PLACES_API_KEY not set, falling back to mock flowers");
     return mockData.flowers;
   }
-
-  const query = style
-    ? `${style} wedding florist in ${location}`
-    : `wedding florist flowers decoration in ${location}`;
 
   try {
     console.log("[searchFlowers] Querying Google Places:", query);
@@ -21,7 +17,7 @@ export async function searchFlowers(location: string, style?: string): Promise<W
         "X-Goog-FieldMask":
           "places.id,places.displayName,places.formattedAddress,places.editorialSummary,places.photos,places.rating,places.userRatingCount,places.websiteUri,places.location",
       },
-      body: JSON.stringify({ textQuery: query, maxResultCount: 6 }),
+      body: JSON.stringify({ textQuery: query, maxResultCount: 4 }),
     });
 
     console.log("[searchFlowers] Response status:", response.status);

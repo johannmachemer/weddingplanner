@@ -1,15 +1,11 @@
 import { mockData, type WeddingOption } from "../data.js";
 
-export async function searchMusic(location: string, style?: string): Promise<WeddingOption[]> {
+export async function searchMusic(query: string): Promise<WeddingOption[]> {
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   if (!apiKey) {
     console.warn("GOOGLE_PLACES_API_KEY not set, falling back to mock music");
     return mockData.music;
   }
-
-  const query = style
-    ? `${style} wedding music entertainment in ${location}`
-    : `wedding band DJ live music in ${location}`;
 
   try {
     console.log("[searchMusic] Querying Google Places:", query);
@@ -21,7 +17,7 @@ export async function searchMusic(location: string, style?: string): Promise<Wed
         "X-Goog-FieldMask":
           "places.id,places.displayName,places.formattedAddress,places.editorialSummary,places.photos,places.rating,places.userRatingCount,places.websiteUri,places.location",
       },
-      body: JSON.stringify({ textQuery: query, maxResultCount: 6 }),
+      body: JSON.stringify({ textQuery: query, maxResultCount: 4 }),
     });
 
     console.log("[searchMusic] Response status:", response.status);

@@ -105,24 +105,31 @@ const server = new McpServer(
         "The widget handles all category browsing, selection, and summary internally. " +
         "Do NOT call this multiple times. After calling it, let the user interact with the widget. " +
         "If the user asks questions about options while using the widget, answer helpfully based on your wedding expertise. " +
-        "When the user shares their final plan via the widget, celebrate their choices and highlight how they complement each other.",
+        "When the user shares their final plan via the widget, celebrate their choices and highlight how they complement each other. " +
+        "IMPORTANT: Always provide the 'queries' parameter with tailored Google Places search queries for each category based on what you learned during the discovery conversation. " +
+        "Craft specific queries that reflect the couple's style, location, and preferences (e.g. 'rustic barn wedding venue near Provence' instead of generic 'wedding venue')."+
+        "When the users asks for changes or is not satisfied with the options, recall the tool with a new query for this category that is more specific based on their feedback. For example, if they want more elegant venues, update the query to 'elegant wedding venues in [location]'. ",
       inputSchema: {
-        style: z.string().optional().describe("The user's preferred wedding style"),
         guestCount: z.number().optional().describe("Expected number of guests"),
-        budget: z.number().optional().describe("Total wedding budget"),
-        location: z.string().optional().describe("Preferred location or region"),
+        queries: z.object({
+          venues: z.string().describe("Google Places search query for wedding venues"),
+          catering: z.string().describe("Google Places search query for catering"),
+          music: z.string().describe("Google Places search query for music & entertainment"),
+          flowers: z.string().describe("Google Places search query for florists & decoration"),
+          photography: z.string().describe("Google Places search query for photographers"),
+        }).describe("Search queries for each category, tailored to the couple's preferences."),
       },
       annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
     },
-    async ({ style, guestCount, budget: _budget, location }) => {
-      console.log("[plan-wedding] location:", location, "| style:", style, "| API key set:", !!process.env.GOOGLE_PLACES_API_KEY);
+    async ({ guestCount, queries }) => {
+      console.log("[plan-wedding] queries:", queries, "| API key set:", !!process.env.GOOGLE_PLACES_API_KEY);
 
       const [venueOptions, cateringOptions, musicOptions, flowerOptions, photoOptions] = await Promise.all([
-        location ? searchVenues(location, style) : Promise.resolve(mockData.venues),
-        location ? searchCatering(location, style) : Promise.resolve(mockData.catering),
-        location ? searchMusic(location, style) : Promise.resolve(mockData.music),
-        location ? searchFlowers(location, style) : Promise.resolve(mockData.flowers),
-        location ? searchPhotography(location, style) : Promise.resolve(mockData.photography),
+        searchVenues(queries.venues),
+        searchCatering(queries.catering),
+        searchMusic(queries.music),
+        searchFlowers(queries.flowers),
+        searchPhotography(queries.photography),
       ]);
 
       const liveData: Record<string, typeof venueOptions> = {

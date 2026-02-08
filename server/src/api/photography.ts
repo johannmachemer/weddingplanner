@@ -1,15 +1,11 @@
 import { mockData, type WeddingOption } from "../data.js";
 
-export async function searchPhotography(location: string, style?: string): Promise<WeddingOption[]> {
+export async function searchPhotography(query: string): Promise<WeddingOption[]> {
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   if (!apiKey) {
     console.warn("GOOGLE_PLACES_API_KEY not set, falling back to mock photography");
     return mockData.photography;
   }
-
-  const query = style
-    ? `${style} wedding photographer in ${location}`
-    : `wedding photographer photography in ${location}`;
 
   try {
     console.log("[searchPhotography] Querying Google Places:", query);
@@ -21,7 +17,7 @@ export async function searchPhotography(location: string, style?: string): Promi
         "X-Goog-FieldMask":
           "places.id,places.displayName,places.formattedAddress,places.editorialSummary,places.photos,places.rating,places.userRatingCount,places.websiteUri,places.location",
       },
-      body: JSON.stringify({ textQuery: query, maxResultCount: 6 }),
+      body: JSON.stringify({ textQuery: query, maxResultCount: 4 }),
     });
 
     console.log("[searchPhotography] Response status:", response.status);

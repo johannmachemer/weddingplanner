@@ -1,99 +1,162 @@
-# Skybridge Starter
+# Wedding Planner
 
-A minimal TypeScript template for building MCP and ChatGPT Apps with the [Skybridge](https://docs.skybridge.tech/home) framework.
+An AI-powered wedding planning assistant that guides couples through the entire planning process — from discovering their dream wedding vision to selecting venues, catering, music, flowers, and photography — all through natural conversation paired with interactive visual widgets.
 
-## Getting Started
+Built with [Skybridge](https://docs.skybridge.tech/home) and the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/), deployable as a ChatGPT App or any MCP-compatible client.
+
+---
+
+## Try It Out
+
+**Website:** [https://your-ai-wedding-pal.lovable.app](https://your-ai-wedding-pal.lovable.app)
+
+**In ChatGPT:** [https://weddingplanner-2f049859.alpic.live/](https://weddingplanner-2f049859.alpic.live/)
+
+**Directly in Alpic:** [https://weddingplanner-2f049859.alpic.live/try](https://weddingplanner-2f049859.alpic.live/try)
+
+---
+
+## The Problem
+
+Planning a wedding means visiting dozens of websites for venues, caterers, florists, photographers, and more — with no unified guidance. Couples feel overwhelmed juggling options across scattered sources while trying to stay within budget.
+
+## The Solution
+
+Wedding Planner combines conversational AI with interactive visual widgets. Instead of filling out forms on 10 different websites, you describe your dream wedding naturally — *"rustic outdoor wedding for 80 guests, budget $20k"* — and get guided through everything step by step.
+
+The AI understands your preferences, reasons about what fits together (outdoor venue = outdoor-friendly catering), and adapts to your pace. The interactive widget lets you browse real venues and vendors, compare prices, view locations on a map, and build a complete wedding plan.
+
+## Features
+
+- **Conversational Discovery** — Natural language interview to understand your wedding vision (date, location, guest count, budget, style, must-haves)
+- **Real Vendor Data** — Searches Google Places API for actual venues, caterers, musicians, florists, and photographers in your area
+- **Interactive Maps** — Mapbox-powered maps for browsing venue and florist locations
+- **Step-by-Step Planning** — Guided flow through 5 categories: Venues, Catering, Music, Flowers, Photography
+- **Budget Tracking** — Live running total across all selections vs. your stated budget
+- **Full-Screen Widget** — Elegant sidebar navigation with category cards, image previews, and selection state
+
+## How It Works
+
+1. **Start a conversation** — Tell the AI about your dream wedding
+2. **Discovery interview** — The AI asks about your date, location, guest count, budget, and style preferences
+3. **Widget opens** — A full-screen interactive planner appears with vendor options tailored to your preferences
+4. **Browse & select** — Navigate through venues (with map), catering, music, flowers, and photography
+5. **Review your plan** — See a summary of all selections
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Framework** | [Skybridge](https://docs.skybridge.tech/home) (MCP App framework) |
+| **Backend** | TypeScript, Node.js 24+, Express 5 |
+| **Frontend** | React 19, Vite 7 |
+| **Maps** | Mapbox GL |
+| **Vendor Data** | Google Places API |
+| **Validation** | Zod |
+| **Deployment** | [Alpic](https://alpic.ai/) |
+
+## Project Structure
+
+```
+weddingplanner/
+├── server/
+│   └── src/
+│       ├── index.ts          # Express server entry point (port 3000)
+│       ├── server.ts         # MCP server, tool & widget registration
+│       ├── middleware.ts     # MCP HTTP middleware
+│       ├── data.ts           # Fallback mock data for all categories
+│       └── api/
+│           ├── venues.ts         # Google Places search — venues
+│           ├── catering.ts       # Google Places search — catering
+│           ├── music.ts          # Google Places search — music
+│           ├── flowers.ts        # Google Places search — flowers
+│           └── photography.ts    # Google Places search — photography
+├── web/
+│   └── src/
+│       ├── widgets/
+│       │   └── plan-wedding.tsx  # Full-screen React wedding planner widget
+│       ├── helpers.ts            # Skybridge hook generators
+│       └── index.css             # Global styles & design tokens
+├── alpic.json                    # Alpic deployment config
+├── nodemon.json                  # Dev server file watching
+├── package.json
+└── tsconfig.json
+```
+
+## Setup & Installation
 
 ### Prerequisites
 
-- Node.js 24+
-- HTTP tunnel such as [ngrok](https://ngrok.com/download) if you want to test with remote MCP hosts like ChatGPT or Claude.ai.
+- **Node.js 24+** ([download](https://nodejs.org/))
+- **pnpm** (recommended), npm, yarn, or bun
 
-### Local Development
-
-#### 1. Install
+### 1. Clone the repository
 
 ```bash
-npm install
-# or
-yarn install
-# or
+git clone <repo-url>
+cd weddingplanner
+```
+
+### 2. Install dependencies
+
+```bash
 pnpm install
-# or
-bun install
 ```
 
-#### 2. Start your local server
+### 3. Set up environment variables
 
-Run the development server from the root directory:
+Create a `.env` file in the project root:
+
+```env
+GOOGLE_PLACES_API_KEY=your_google_places_api_key
+```
+
+> The app works without a Google Places API key — it falls back to built-in mock data. With the key, it fetches real venues and vendors from Google Places.
+
+### 4. Start the development server
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
 pnpm dev
-# or
-bun dev
 ```
 
-This command starts:
-- Your MCP server at `http://localhost:3000/mcp`.
-- Skybridge DevTools UI at `http://localhost:3000/`.
+This starts:
+- **MCP server** at `http://localhost:3000/mcp`
+- **Skybridge DevTools UI** at `http://localhost:3000/`
+- **Hot Module Replacement** for instant widget updates
 
-#### 3. Project structure
+### 5. Test your app
 
-```
-├── server/
-│   └── src/
-│       ├── index.ts      # Entry point
-│       ├── middleware.ts # MCP middleware
-│       └── server.ts     # Widget registry & routes
-├── web/
-│   ├── src/
-│   │   ├── widgets/      # React components (one per widget)
-│   │   ├── helpers.ts    # Shared utilities
-│   │   └── index.css     # Global styles
-│   └── vite.config.ts
-├── alpic.json            # Deployment config
-├── nodemon.json          # Dev server config
-└── package.json
+- **Locally**: Open `http://localhost:3000` to use the Skybridge DevTools UI
+- **With ChatGPT / Claude**: Use an HTTP tunnel like [ngrok](https://ngrok.com/download) to expose your local server, then connect via the MCP endpoint. See [Testing Your App](https://docs.skybridge.tech/quickstart/test-your-app).
+
+## Build & Deploy
+
+### Build for production
+
+```bash
+pnpm build
 ```
 
-### Create your first widget
+Compiles the TypeScript server and Vite frontend into the `dist/` directory.
 
-#### 1. Add a new widget
+### Start production server
 
-- Register a widget in `server/src/server.ts` with a unique name (e.g., `my-widget`) using [`registerWidget`](https://docs.skybridge.tech/api-reference/register-widget)
-- Create a matching React component at `web/src/widgets/my-widget.tsx`. **The file name must match the widget name exactly**.
+```bash
+pnpm start
+```
 
-#### 2. Edit widgets with Hot Module Replacement (HMR)
+### Deploy to Alpic
 
-Edit and save components in `web/src/widgets/` — changes will appear instantly inside your App.
+```bash
+pnpm deploy
+```
 
-#### 3. Edit server code
-
-Modify files in `server/` and refresh the connection with your testing MCP Client to see the changes.
-
-### Testing your App
-
-You can test your App locally by using our DevTools UI on `localhost:3000` while running the `pnpm dev` command.
-
-To test your app with other MCP Clients like ChatGPT, Claude or VSCode, see [Testing Your App](https://docs.skybridge.tech/quickstart/test-your-app).
-
-
-## Deploy to Production
-
-Skybridge is infrastructure vendor agnostic, and your app can be deployed on any cloud platform supporting MCP.
-
-Deploy your app in minutes with [Alpic](https://alpic.ai/).
-1. Create an account on [Alpic platform](https://app.alpic.ai/). 
-2. Connect your GitHub repository to automatically deploy at each commit. 
-3. Use your remote App URL to connect it to MCP Clients, or use the Alpic Playground to easily test your App.
+Deploys to [Alpic](https://alpic.ai/) — create an account at [app.alpic.ai](https://app.alpic.ai/) first.
 
 ## Resources
+
 - [Skybridge Documentation](https://docs.skybridge.tech/)
-- [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
+- [OpenAI Apps SDK Documentation](https://developers.openai.com/apps-sdk)
 - [MCP Apps Documentation](https://github.com/modelcontextprotocol/ext-apps/tree/main)
-- [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
+- [Model Context Protocol](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)

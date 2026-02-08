@@ -28,23 +28,26 @@ importers:
         version: 19.2.4(react@19.2.4)
       skybridge:
         specifier: '>=0.29.1 <1.0.0'
-        version: 0.30.0(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@types/node@25.2.1)(@types/react@19.2.13)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.4))
+        version: 0.30.0(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@types/node@25.2.2)(@types/react@19.2.13)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.4))
       vite:
         specifier: ^7.3.1
-        version: 7.3.1(@types/node@25.2.1)(tsx@4.21.0)
+        version: 7.3.1(@types/node@25.2.2)(tsx@4.21.0)
       zod:
         specifier: ^4.3.5
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
         specifier: '>=0.26.1 <1.0.0'
-        version: 0.30.0(@types/node@25.2.1)(@types/react-dom@19.2.3(@types/react@19.2.13))(@types/react@19.2.13)(nodemon@3.1.11)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.4))(zod@4.3.6)
+        version: 0.30.0(@types/node@25.2.2)(@types/react-dom@19.2.3(@types/react@19.2.13))(@types/react@19.2.13)(nodemon@3.1.11)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.4))(zod@4.3.6)
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
+      '@types/node':
+        specifier: ^25.2.2
+        version: 25.2.2
       '@types/react':
         specifier: ^19.2.8
         version: 19.2.13
@@ -53,7 +56,7 @@ importers:
         version: 19.2.3(@types/react@19.2.13)
       '@vitejs/plugin-react':
         specifier: ^5.1.2
-        version: 5.1.3(vite@7.3.1(@types/node@25.2.1)(tsx@4.21.0))
+        version: 5.1.3(vite@7.3.1(@types/node@25.2.2)(tsx@4.21.0))
       alpic:
         specifier: ^1.83.1
         version: 1.84.3
@@ -1247,8 +1250,8 @@ packages:
   '@types/mdast@4.0.4':
     resolution: {integrity: sha512-kGaNbPh1k7AFzgpud/gMdvIm5xuECykRR+JnWKQno9TAXVa6WIVCGTPvYGekIDL4uwCZQSYbUxNBSb1aUo79oA==}
 
-  '@types/node@25.2.1':
-    resolution: {integrity: sha512-CPrnr8voK8vC6eEtyRzvMpgp3VyVRhgclonE7qYi6P9sXwYb59ucfrnmFBTaP0yUi8Gk4yZg/LlTJULGxvTNsg==}
+  '@types/node@25.2.2':
+    resolution: {integrity: sha512-BkmoP5/FhRYek5izySdkOneRyXYN35I860MFAGupTdebyE66uZaR+bXLHq8k4DirE5DwQi3NuhvRU1jqTVwUrQ==}
 
   '@types/pbf@3.0.5':
     resolution: {integrity: sha512-j3pOPiEcWZ34R6a6mN07mUkM4o4Lwf6hPNt8eilOeZhTFbxFXmKhvXl9Y28jotFPaI1bpPDJsbCprUoNke6OrA==}
@@ -3687,31 +3690,31 @@ snapshots:
 
   '@inquirer/ansi@1.0.2': {}
 
-  '@inquirer/confirm@5.1.21(@types/node@25.2.1)':
+  '@inquirer/confirm@5.1.21(@types/node@25.2.2)':
     dependencies:
-      '@inquirer/core': 10.3.2(@types/node@25.2.1)
-      '@inquirer/type': 3.0.10(@types/node@25.2.1)
+      '@inquirer/core': 10.3.2(@types/node@25.2.2)
+      '@inquirer/type': 3.0.10(@types/node@25.2.2)
     optionalDependencies:
-      '@types/node': 25.2.1
+      '@types/node': 25.2.2
 
-  '@inquirer/core@10.3.2(@types/node@25.2.1)':
+  '@inquirer/core@10.3.2(@types/node@25.2.2)':
     dependencies:
       '@inquirer/ansi': 1.0.2
       '@inquirer/figures': 1.0.15
-      '@inquirer/type': 3.0.10(@types/node@25.2.1)
+      '@inquirer/type': 3.0.10(@types/node@25.2.2)
       cli-width: 4.1.0
       mute-stream: 2.0.0
       signal-exit: 4.1.0
       wrap-ansi: 6.2.0
       yoctocolors-cjs: 2.1.3
     optionalDependencies:
-      '@types/node': 25.2.1
+      '@types/node': 25.2.2
 
   '@inquirer/figures@1.0.15': {}
 
-  '@inquirer/type@3.0.10(@types/node@25.2.1)':
+  '@inquirer/type@3.0.10(@types/node@25.2.2)':
     optionalDependencies:
-      '@types/node': 25.2.1
+      '@types/node': 25.2.2
 
   '@isaacs/balanced-match@4.0.1': {}
 
@@ -4434,7 +4437,7 @@ snapshots:
 
   '@sindresorhus/merge-streams@4.0.0': {}
 
-  '@skybridge/devtools@0.30.0(@types/node@25.2.1)(@types/react-dom@19.2.3(@types/react@19.2.13))(@types/react@19.2.13)(nodemon@3.1.11)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.4))(zod@4.3.6)':
+  '@skybridge/devtools@0.30.0(@types/node@25.2.2)(@types/react-dom@19.2.3(@types/react@19.2.13))(@types/react@19.2.13)(nodemon@3.1.11)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.4))(zod@4.3.6)':
     dependencies:
       '@base-ui/react': 1.1.0(@types/react@19.2.13)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@fontsource-variable/jetbrains-mono': 5.2.8
@@ -4459,9 +4462,9 @@ snapshots:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       react-resizable-panels: 4.6.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      shadcn: 3.8.4(@types/node@25.2.1)(typescript@5.9.3)
+      shadcn: 3.8.4(@types/node@25.2.2)(typescript@5.9.3)
       shiki: 3.22.0
-      skybridge: 0.30.0(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@types/node@25.2.1)(@types/react@19.2.13)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.4))
+      skybridge: 0.30.0(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@types/node@25.2.2)(@types/react@19.2.13)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.4))
       tailwind-merge: 3.4.0
       tailwindcss: 4.1.18
       tailwindcss-animate: 1.0.7(tailwindcss@4.1.18)
@@ -4540,21 +4543,21 @@ snapshots:
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 25.2.1
+      '@types/node': 25.2.2
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 25.2.1
+      '@types/node': 25.2.2
 
   '@types/cors@2.8.19':
     dependencies:
-      '@types/node': 25.2.1
+      '@types/node': 25.2.2
 
   '@types/estree@1.0.8': {}
 
   '@types/express-serve-static-core@5.1.1':
     dependencies:
-      '@types/node': 25.2.1
+      '@types/node': 25.2.2
       '@types/qs': 6.14.0
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
@@ -4589,7 +4592,7 @@ snapshots:
     dependencies:
       '@types/unist': 3.0.3
 
-  '@types/node@25.2.1':
+  '@types/node@25.2.2':
     dependencies:
       undici-types: 7.16.0
 
@@ -4609,12 +4612,12 @@ snapshots:
 
   '@types/send@1.2.1':
     dependencies:
-      '@types/node': 25.2.1
+      '@types/node': 25.2.2
 
   '@types/serve-static@2.2.0':
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 25.2.1
+      '@types/node': 25.2.2
 
   '@types/statuses@2.0.6': {}
 
@@ -4628,7 +4631,7 @@ snapshots:
 
   '@ungap/structured-clone@1.3.0': {}
 
-  '@vitejs/plugin-react@5.1.3(vite@7.3.1(@types/node@25.2.1)(tsx@4.21.0))':
+  '@vitejs/plugin-react@5.1.3(vite@7.3.1(@types/node@25.2.2)(tsx@4.21.0))':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.29.0)
@@ -4636,7 +4639,7 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-rc.2
       '@types/babel__core': 7.20.5
       react-refresh: 0.18.0
-      vite: 7.3.1(@types/node@25.2.1)(tsx@4.21.0)
+      vite: 7.3.1(@types/node@25.2.2)(tsx@4.21.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -5681,9 +5684,9 @@ snapshots:
 
   ms@2.1.3: {}
 
-  msw@2.12.9(@types/node@25.2.1)(typescript@5.9.3):
+  msw@2.12.9(@types/node@25.2.2)(typescript@5.9.3):
     dependencies:
-      '@inquirer/confirm': 5.1.21(@types/node@25.2.1)
+      '@inquirer/confirm': 5.1.21(@types/node@25.2.2)
       '@mswjs/interceptors': 0.41.2
       '@open-draft/deferred-promise': 2.2.0
       '@types/statuses': 2.0.6
@@ -6122,7 +6125,7 @@ snapshots:
 
   setprototypeof@1.2.0: {}
 
-  shadcn@3.8.4(@types/node@25.2.1)(typescript@5.9.3):
+  shadcn@3.8.4(@types/node@25.2.2)(typescript@5.9.3):
     dependencies:
       '@antfu/ni': 25.0.0
       '@babel/core': 7.29.0
@@ -6144,7 +6147,7 @@ snapshots:
       fuzzysort: 3.1.0
       https-proxy-agent: 7.0.6
       kleur: 4.1.5
-      msw: 2.12.9(@types/node@25.2.1)(typescript@5.9.3)
+      msw: 2.12.9(@types/node@25.2.2)(typescript@5.9.3)
       node-fetch: 3.3.2
       open: 11.0.0
       ora: 8.2.0
@@ -6225,7 +6228,7 @@ snapshots:
 
   sisteransi@1.0.5: {}
 
-  skybridge@0.30.0(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@types/node@25.2.1)(@types/react@19.2.13)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.4)):
+  skybridge@0.30.0(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@types/node@25.2.2)(@types/react@19.2.13)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.4)):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.6)
@@ -6242,7 +6245,7 @@ snapshots:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       superjson: 2.2.6
-      vite: 7.3.1(@types/node@25.2.1)(tsx@4.21.0)
+      vite: 7.3.1(@types/node@25.2.2)(tsx@4.21.0)
       zustand: 5.0.11(@types/react@19.2.13)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
     transitivePeerDependencies:
       - '@types/node'
@@ -6534,7 +6537,7 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
 
-  vite@7.3.1(@types/node@25.2.1)(tsx@4.21.0):
+  vite@7.3.1(@types/node@25.2.2)(tsx@4.21.0):
     dependencies:
       esbuild: 0.27.3
       fdir: 6.5.0(picomatch@4.0.3)
@@ -6543,7 +6546,7 @@ snapshots:
       rollup: 4.57.1
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 25.2.1
+      '@types/node': 25.2.2
       fsevents: 2.3.3
       tsx: 4.21.0
 
